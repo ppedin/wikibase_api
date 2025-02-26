@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+        <title type="main">Complete Works of Benedetto Croce</title>
+        <title type="short">Croce's Works</title>
+        <title type="alternative">Opera Omnia di Benedetto Croce</title>
+        <author>
+          <persName>
+            <forename>Benedetto</forename>
+            <surname>Croce</surname>
+            <idno type="VIAF">24606774</idno>
+          </persName>
+        </author>
+      </titleStmt>
+      <editionStmt>
+        <edition>
+          <note type="digital-edition">First Digital Edition</note>
+          <note type="digital-format">Critical Edition</note>
+        </edition>
+      </editionStmt>
+      <publicationStmt>
+        <publisher>CNR-ILIESI</publisher>
+        <idno type="identifier">CROCE-2023-001</idno>
+        <idno type="DOI">10.5281/zenodo.1234567</idno>
+        <date>2023-06-15</date>
+        <pubPlace>Rome</pubPlace>
+        <authority>National Research Council of Italy</authority>
+        <availability>
+          <p>Available under Creative Commons Attribution 4.0 International License (CC BY 4.0)</p>
+        </availability>
+        <listRef>
+          <ref type="external-image" target="https://example.com/croce-portrait.jpg" subtype="jpg" xml:id="ID-ext-img-001">
+            <desc>Portrait of Benedetto Croce</desc>
+          </ref>
+        </listRef>
+      </publicationStmt>
+      <notesStmt>
+        <note type="editorial">This digital edition includes all known works of Benedetto Croce.</note>
+        <note type="original-edition">Based on the editions published between 1902 and 1952.</note>
+        <note type="repository">Digital Humanities Archive of CNR-ILIESI</note>
+      </notesStmt>
+      <sourceDesc>
+        <biblFull>
+          <titleStmt>
+            <title>The Complete Works of Benedetto Croce</title>
+            <author>
+              <persName>
+                <forename>Benedetto</forename>
+                <surname>Croce</surname>
+              </persName>
+            </author>
+          </titleStmt>
+          <publicationStmt>
+            <publisher>Laterza</publisher>
+            <date>1902-1952</date>
+            <pubPlace>Bari</pubPlace>
+          </publicationStmt>
+          <notesStmt>
+            <note type="volume">20</note>
+            <note type="pages">4000</note>
+            <note type="format">8°</note>
+            <note type="documents">150</note>
+          </notesStmt>
+        </biblFull>
+      </sourceDesc>
+    </fileDesc>
+    <encodingDesc>
+      <p>The text has been encoded using TEI P5 guidelines.</p>
+      <samplingDecl>
+        <p>All texts have been fully transcribed and annotated.</p>
+      </samplingDecl>
+    </encodingDesc>
+    <profileDesc>
+      <langUsage>
+        <language ident="it">Italian</language>
+        <language ident="la">Latin</language>
+        <language ident="fr">French</language>
+      </langUsage>
+      <abstract>
+        <p>This digital edition contains all published works of the Italian philosopher Benedetto Croce, including his philosophical treatises, historical works, literary criticism, and personal correspondence.</p>
+      </abstract>
+      <textClass>
+        <keywords>
+          <term xml:lang="en">Philosophy</term>
+          <term xml:lang="en">Aesthetics</term>
+          <term xml:lang="en">Italian Idealism</term>
+          <term xml:lang="en">History</term>
+        </keywords>
+      </textClass>
+    </profileDesc>
+    <revisionDesc>
+      <change who="Marco Rossi">
+        <date>2023-05-10</date>
+        <desc>Initial encoding of the collection</desc>
+      </change>
+      <change who="Laura Bianchi">
+        <date>2023-06-01</date>
+        <desc>Added metadata and completed markup</desc>
+      </change>
+    </revisionDesc>
+  </teiHeader>
+  <text>
+    <body>
+      <p>Content of the text...</p>
+    </body>
+  </text>
+</TEI>

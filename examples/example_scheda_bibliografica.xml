@@ -1,0 +1,183 @@
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xml:lang="en">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title type="main">The title of the resource</title>
+                <title type="short">The abbreviated title of the resource</title>
+                <title type="alternative">The title that identifies the resource with another denomination</title>
+                <author>
+                    <persName ref="https://viaf.org/viaf/123456 http://isni.org/isni/000000012146438X">
+                        <forename>The author's name</forename>
+                        <forename full="init">The first letter of the author's name</forename>
+                        <surname>The author's surname</surname>  
+                        <idno type="VIAF">The database that aggregates global information, creating a unique ID for authors and cultural figures</idno>
+                        <idno type="ISNI">The code that uniquely identifies authors and creators, distinguishing people with the same name</idno>                 
+                    </persName>
+                </author>
+                <respStmt>
+                    <resp>Curator</resp>  <!-- Curator (a person, family, or organisation conceiving, aggregating, and/or organizing an exhibition, collection, or other item) -->
+                        <persName ref="https://viaf.org/viaf/123456 http://isni.org/isni/000000012146438X">
+                            <forename>The curator's name</forename>
+                            <forename full="init">The first letter of the curator's name</forename>
+                            <surname>The curator's surname</surname>
+                            <idno type="VIAF">The database that aggregates global information, creating a unique ID for authors and cultural figures</idno>
+                            <idno type="ISNI">The code that uniquely identifies authors and creators, distinguishing people with the same name</idno>                    
+                        </persName>
+                </respStmt>
+                <respStmt>
+                    <resp>Curator</resp> <!-- Curator (a person, family, or organisation conceiving, aggregating, and/or organizing an exhibition, collection, or other item) -->
+                        <orgName>The name of the organisation that has curated the digital resource</orgName>
+                </respStmt>
+                <respStmt>
+                    <resp>Facsimilist</resp>  <!-- Facsimilist (a person or organisation that executed the facsimile) -->
+                        <persName ref="https://viaf.org/viaf/123456 http://isni.org/isni/000000012146438X">
+                            <forename>The facsimilist's name</forename>
+                            <forename full="init">The first letter of the facsimilist's name</forename>
+                            <surname>The facsimilist's surname</surname>
+                            <idno type="VIAF">The database that aggregates global information, creating a unique ID for authors and cultural figures</idno>
+                            <idno type="ISNI">The code that uniquely identifies authors and creators, distinguishing people with the same name</idno>                    
+                        </persName>
+                </respStmt>
+                <respStmt>
+                    <resp>Facsimilist</resp> <!-- Facsimilist (a person or organisation that executed the facsimile) -->
+                        <orgName>The name of the organisation that is the author of the digitalization of the resource</orgName>
+                </respStmt>
+            </titleStmt>
+            <editionStmt>      <!-- Edition of the digital resource -->
+	            <edition>
+                    <note type="digital-edition">The edition of the digital resource (e.g. first, second, third, ...)</note>         
+		            <note type="digital-format">The format of the digital resource (fac-simile, trascription, critical edition)</note>
+	            </edition>
+            </editionStmt> 
+            <publicationStmt>
+                <publisher>The name of organisation responsible for the publication or distribution of the digital resource</publisher>
+                <idno type="identifier">Form of identifier used to identify some object, such as a bibliographic item, a person, a title, an organisation</idno>
+                <idno type="DOI">A unique string of letters and numbers assigned to an electronic document</idno>
+                <date>The publication date of the digital resource</date>
+                <pubPlace>The name of the place where the digital resource was published</pubPlace>
+                <authority>The name of a person or other agency responsible for making the resource available, other than a publisher or distributor</authority>
+                <availability>
+                    <p>Information about the availability of a resource (for example any restrictions on its use or distribution, its copyright status, any licence applying to it, etc)</p>
+                </availability>
+                <listRef>   <!-- List of the external/internal resources (uploaded/linked)) Multivalue -->
+                    <ref type="external-image" target="URL_image" subtype="jpg" xml:id="ID-ext-img-001"><desc>The title of the external image</desc></ref>
+                    <ref type="external-doc" target="URL_text" subtype="pdf" xml:id="ID-ext-doc-001"><desc>The title of the external document</desc></ref>
+                    <ref type="internal-image" target="URL_image" subtype="png" xml:id="ID-int-img-002"><desc>The title of the internal image</desc></ref>
+                    <ref type="internal-doc" target="URL_doc" subtype="docx" xml:id="ID-int-doc-002"><desc>The title of the internal document</desc></ref>
+                </listRef>
+            </publicationStmt>
+            <notesStmt>
+                <note>
+                    <note type="repository">Information about the repository where the digital material is stored</note>
+                    <note type="archival-code">The archival code associated with the digital resource</note>
+                    <ref target="https://example.com">A hyperlink to additional resources or information related to the repository or the materials in question</ref>
+                    <note type="editorial">An editorial note or annotation about the resource</note>
+                    <note type="original-edition">A note or annotation about the original edition of the resource</note>
+                </note>
+            </notesStmt>
+            <sourceDesc>  <!-- Print material -->
+                <biblFull>   
+                    <titleStmt>
+                        <title type="main">The title for the resource</title>   
+                        <author>
+                            <persName ref="https://viaf.org/viaf/123456 http://isni.org/isni/000000012146438X">
+                                <forename>The author's name</forename>
+                                <forename full="init">The first letter of the author's name</forename>
+                                <surname>The author's surname</surname>  
+                                <idno type="VIAF">The database that aggregates global information, creating a unique ID for authors and cultural figures</idno>
+                                <idno type="ISNI">The code that uniquely identifies authors and creators, distinguishing people with the same name</idno>                 
+                            </persName>
+                        </author>
+                        <respStmt>
+                            <resp>Illustrator</resp>  <!-- Illustrator (a person, family, or organisation contributing to a resource by supplementing the primary content with drawings, diagrams, photographs, etc. If the work is primarily the artistic content created by this entity, use artist or photographer) -->
+                                <persName ref="https://viaf.org/viaf/123456 http://isni.org/isni/000000012146438X">
+                                    <forename>The illustrator's name</forename>
+                                    <forename full="init">The first letter of the illustrator's name</forename>
+                                    <surname>The illustrator's surname</surname>
+                                    <idno type="VIAF">The database that aggregates global information, creating a unique ID for authors and cultural figures</idno>
+                                    <idno type="ISNI">The code that uniquely identifies authors and creators, distinguishing people with the same name</idno>                    
+                                </persName>
+                        </respStmt>
+                        <respStmt>
+                            <resp>Illustrator</resp> <!-- Illustrator (a person, family, or organisation contributing to a resource by supplementing the primary content with drawings, diagrams, photographs, etc. If the work is primarily the artistic content created by this entity, use artist or photographer) -->
+                                <orgName>The name of the organisation that provides drawings, diagrams etc. to support the main content</orgName>
+                        </respStmt>
+                        <respStmt>
+                            <resp>Printer</resp>   <!-- Printer (a person, family, or organisation involved in manufacturing a manifestation of printed text, notated music, etc., from type or plates, such as a book, newspaper, magazine, broadside, score, etc) -->
+                                <persName ref="https://viaf.org/viaf/123456 http://isni.org/isni/000000012146438X">
+                                    <forename>The printer's name</forename>
+                                    <forename full="init">The first letter of the printer's name</forename>
+                                    <surname>The printer's surname</surname>
+                                    <idno type="VIAF">The database that aggregates global information, creating a unique ID for authors and cultural figures</idno>
+                                    <idno type="ISNI">The code that uniquely identifies authors and creators, distinguishing people with the same name</idno>                    
+                                </persName>
+                        </respStmt>
+                        <respStmt> <!-- (Organisation) Multivalue -->
+                            <resp>Printer</resp> <!-- Printer (a person, family, or organisation involved in manufacturing a manifestation of printed text, notated music, etc., from type or plates, such as a book, newspaper, magazine, broadside, score, etc) -->
+                                <orgName>The name of the organisation that is involved in the production of a manifestation of printed text, notated music, etc</orgName>
+                        </respStmt>
+                    </titleStmt>
+                    <editionStmt>
+                        <edition>The edition of the print resource (e.g. first, second, third, ...)</edition> <!-- Edition of the print resource -->
+                    </editionStmt>
+                    <publicationStmt>
+                        <publisher>The name of organisation responsible for the publication or distribution of the print resource</publisher>
+                        <date>The publication date of the print resource</date>
+                        <pubPlace>The name of the place where the print resource was published</pubPlace> 
+                        <availability>
+                            <licence>Information about a licence or other legal agreement applicable to the resource</licence>
+                        </availability>
+                    </publicationStmt>
+                    <notesStmt>
+                        <note type="volume">The volume number or the tome number of the resource</note>
+                        <note type="pages">The total number of pages</note> 
+                        <note type="format">The format of the resource (refers to the physical sheet size of the resource, such as 8&amp;, 12&amp;)</note>
+                        <note type="documents">The total number of documents contained in the resource</note>
+                        <note type="repository">Information about the repository where the print material is stored</note>
+                        <note type="archival-code">The archival code associated with the print resource</note>
+                    </notesStmt>
+                </biblFull>
+            </sourceDesc>
+        </fileDesc>
+        <encodingDesc>
+            <p>Information about the presence or the absence of the text encoding</p>
+            <samplingDecl>
+                <p>A prose description of the rationale and methods used in selecting texts, or parts of a text, for inclusion in the resource</p>
+            </samplingDecl>
+        </encodingDesc>
+        <profileDesc>
+            <langUsage> <!-- (Language) Multivalue -->
+                <language ident="ISO-code-lang1">A single language or sublanguage used within the resource</language>
+                <language ident="ISO-code-lang2">A single language or sublanguage used within the resource</language>
+            </langUsage>
+            <abstract>
+                <p>A summary or formal abstract added by the encoder</p>
+            </abstract>
+            <textClass>
+                <keywords> <!-- (Keyword) Multivalue -->
+                    <term xml:lang="ISO-code-lang1">A single-word, multi-word, or phrase identifying the topic or nature of the resource</term>   <!-- Keyword 1 language 1 -->
+                    <term xml:lang="ISO-code-lang2">A single-word, multi-word, or phrase identifying the topic or nature of the resource</term>   <!-- Keyword 1 language 2 -->
+                    <term xml:lang="ISO-code-lang3">A single-word, multi-word, or phrase identifying the topic or nature of the resource</term>   <!-- Keyword 1 language 3 -->
+                </keywords>
+            </textClass>
+        </profileDesc>
+        <revisionDesc> <!-- (Revision changes) Multivalue -->
+            <change who="name autor's revision">      <!-- Revision 1 -->
+                <date>The date of the revision</date>
+                <desc>A brief description of the object of the revision</desc>
+            </change>
+            <change who="name autor's revision">      <!-- Revision 2 -->
+                <date>The date of the revision</date>
+                <desc>A brief description of the object of the revision</desc>
+            </change>
+        </revisionDesc>
+    </teiHeader>
+    <text>
+        <front>
+            <p>No data available</p>
+        </front>
+        <body>
+            <p>No data available</p>
+        </body>
+    </text>
+</TEI>
