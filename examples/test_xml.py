@@ -51,7 +51,9 @@ for titlestmt in tree.xpath(titlestmt_path, namespaces=ns_map):  #  Looks for an
         result['title_in_titlestmt'] = True
         for title in title_elements:
             if title.text:
+                print(title.text)
                 result['title_text'].append(title.text.strip())
+
 
 # Check for <title type="main"> under <sourceDesc><biblFull><titleStmt>
 for sourcedesc_titlestmt in tree.xpath(sourcedesc_path, namespaces=ns_map):  #  Looks for any titleStmt element with a namespace, using ns: to reference elements in that namespace.

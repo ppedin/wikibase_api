@@ -49,11 +49,15 @@ class TitleDetector(Detector):
         Detects if the Title field can be found in the XML content.
         Takes as input the byte representation of the XML content produced by the FileUpload.read() method of FastAPI.
         Uses the schemas defined by Links. 
+        Returns a list with the detected results. 
         """
         root = self.parser(xml_content)  #  Uses the general method to parse the file using lxml. 
         ns = self.get_namespace(root)
         ns_map = {'ns': ns} if ns else {}
 
+        #  Here will be saved all the results of the detection. 
+        results = []
+ 
         # Create namespace-aware path expressions
         if ns:
             # With namespace
@@ -78,14 +82,14 @@ class TitleDetector(Detector):
             if title_elements:
                 for title in title_elements:
                     if title.text:
-                        return True
-
+                        results.append(title.text.strip())
+                        
         # Check for <title type="main"> under <sourceDesc><biblFull><titleStmt>
         for sourcedesc_titlestmt in root.xpath(sourcedesc_path, namespaces=ns_map):  #  Looks for any titleStmt element with a namespace, using ns: to reference elements in that namespace.
             title_elements = sourcedesc_titlestmt.xpath(title_path, namespaces=ns_map)  #  Looks for any title element with type="main" under the titleStmt element 
             if title_elements:
                 for title in title_elements:
                     if title.text:
-                        return True
-
-        return False
+                        results.append(title.text.strip())
+                        
+        return list(set(results))

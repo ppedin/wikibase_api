@@ -34,7 +34,8 @@ class SchemaValidator:
     #  It iterates over the list of detectors for that SchemaValidator and ensures every of them has success (since each of them corresponds to a mandatory attribute). 
     def validate(self, content: bytes) -> ValidationResult:
         for detector in self.detectors:
-            if not detector.detect(content):
+            detection_results = detector.detect(content)
+            if len(detection_results) == 0:
                 return ValidationResult(valid=False, errors=[ValidationError(None, "The field {} is mandatory and has not been detected in the xml provided.".format(detector.field))])
         return ValidationResult(valid=True)
 

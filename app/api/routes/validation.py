@@ -10,6 +10,21 @@ from typing import List, Dict, Any, Optional
 
 from app.services.xml_validator import get_xml_validator, ValidationResult, ValidationError, XMLValidator
 from app.services.schema_registry import SchemaValidator, get_schema_validator
+import app.services.detectors as detectors
+import app.services.callers as callers
+import app.schemas.error as errors
+
+
+#  List all the detectors. This will be used to detect the fields inside a xml file. 
+#  TODO: Complete this mapping when all the detectors will be defined.
+detectors = {
+    "Title": detectors.TitleDetector(),
+}
+
+#  TODO: of course, this will be removed in the last version since they will be passed. 
+DEFAULT_WIKIBASE_USERNAME = "wikibase"
+DEFAULT_WIKIBASE_PASSWORD = "zf4mcfAS5cE3"
+
 
 # Router definition (using the FastAPI class APIRouter).
 #  The tag serves to organize the related endpoints in the API documentation
@@ -35,8 +50,11 @@ class ValidationResponse(BaseModel):
 #  The logic for the endpoint is an asynchronous function
 @router.post("/", response_model=ValidationResponse)
 async def validate_xml(
+    label: str = Form(...),  #  label of the item that will be passed to the instance. 
     file: UploadFile = File(...),  
     resource_type: str = Form(...),
+    username: str = Form(DEFAULT_WIKIBASE_USERNAME),  #TODO: remove the default value in the final version
+    password: str = Form(DEFAULT_WIKIBASE_PASSWORD),  #TODO: remove the default value in the final version
     xml_validator: XMLValidator = Depends(get_xml_validator),
 ): 
     try:
@@ -79,13 +97,32 @@ async def validate_xml(
             )
 
         else:
+            #  Creates a Wikibase client and checks if the connection can be established.
+            client = callers.WikibaseAPIClient(username, password)
+            if not client.check_connection():
+                raise HTTPException(status_code=500, detail="Connection to the Wikibase instance failed")
+            
+            #  First, it checks if an item with the given label already exists in the Wikibase instance.
+            #  If the item already exists, it triggers an early response.  
+            #  We assume that all the items that are added to the instance have an Italian label. 
+            #  TODO: if we want to add items in another language, we will need to pass the label language explicitly in the request. 
+            item_exists, item_id = client.retrieve_item_by_label(label, label_language="it")
+            if item_exists:
+                return HTTPException(status_code=400, detail=f"Item with the given label already exists (item {item_id}). Use the patch endpoint if you want to add/change properties. ")
+    
+            #  Identification of the fields present in the xml file.
+            #  This is done by applying all the detectors. 
+            for field in detectors.keys():
+                #  detection_results is a list with all the values detected for the field.
+                detection_results = detectors[field].detect(content)
+                #  For every detected value, a statement is added to WB. 
+                for detection_result in detection_results:
+                    pass
+
             return ValidationResponse(
                 valid=True,
                 errors=[]
             )
-
-
-
 
     except Exception as e:
         raise HTTPException(
@@ -106,3 +143,8 @@ async def list_schemas(validator: XMLValidator = Depends(get_xml_validator)):
         A list of available schema types.
     """
     return validator.schema_registry.list_schemas()
+
+
+
+
+
