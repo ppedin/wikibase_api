@@ -46,12 +46,91 @@ class WikibaseAPIClient():
         else:
             raise Exception("Error searching for the existence of the item by label: " + response.status_code)
 
-        
 
+    def add_item(self, label, label_language, description=None, description_language=None):
+        #  Add an item to the WB instance, with a given label and a given language, and eventually a description. 
+        #  Uses the payload for the entities/items endpoint of the original Wikibase REST API. 
+        #  Returns the id of the added item if the adding request succeeds, otherwise it returns the None. 
+
+        self.payload = {
+                "item": {
+                    "labels": {label_language: label},
+                    "descriptions": {description_language: description} if description else {},
+                    "aliases": {},
+                    "statements": {},
+                    "sitelinks": {}
+                },
+                "comment": ""
+            }
+
+        response = requests.post(self.base_url + "/rest.php/wikibase/v1/entities/items", auth=(self.username, self.password), json=self.payload)
+
+        if response.status_code == 201:
+            return response.json()["id"]
+
+        return None
+
+    
+    def add_statement(self, item_id, property_id, value):
+        #  Uses the payload for statements endpoint of the original Wikibase REST API.
+        #  So far, it assumes no qualifiers or references are added.
+        #  TODO: evaluate if references and qualifiers will be used and how, so to add them.
+
+        payload = {
+            "statement": {
+                "property": {
+                    "id": property_id
+                },
+                "value": {
+                    "type": "value",  #  it's not clear what this field means but it is the only one who seems to work.
+                    "content": value
+                },
+                "qualifiers": [],
+                "references": []
+            },
+            "tags": [],
+            "bot": False,
+            "comment": ""
+        }
+
+        response = requests.post(self.base_url + "/rest.php/wikibase/v1/entities/items/" + item_id + "/statements", auth=(self.username, self.password), json=payload)
+
+        if response.status_code == 201:
+            return True
+        print(response.status_code)
+        print(response.text)
+        return None
+
+
+    def add_property(self, label, label_language, description, description_language):
+        #  This method will not be used by the actual API, but its serve to tweak the properties of the instance in order to adapt the expected datatypes. 
+        #  TODO: change the datatypes of the properties (so far, it has only been done for the Title property).
+
+        payload = {
+                "property": {
+                    "data_type": "string",
+                    "labels": {label_language: label},
+                    "descriptions": {description_language: description},
+                    "aliases": {},
+                    "statements": {}
+                },
+                "comment": ""
+            }
+
+        response = requests.post(self.base_url + "/rest.php/wikibase/v1/entities/properties", auth=(self.username, self.password), json=payload)
+
+        if response.status_code == 201:
+            return response.json()["id"]
+        print(response.status_code)
+        print(response.text)
+
+        return None
+
+
+    
 
 
 if __name__ == "__main__":
     client = WikibaseAPIClient("wikibase", "zf4mcfAS5cE3")
     print(client.check_connection())
-    label = "ABCSU"
-    print(client.retrieve_item_by_label(label, "it"))
+    #  client.add_property("Title", "en", "The title of the resource", "en")

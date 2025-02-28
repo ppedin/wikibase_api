@@ -23,3 +23,5 @@ class ValidationErrorResponse(BaseModel):
 class HTTPError(BaseModel):
     """HTTP error response."""
     detail: str
+
+    

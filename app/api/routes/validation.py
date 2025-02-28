@@ -16,9 +16,12 @@ import app.schemas.error as errors
 
 
 #  List all the detectors. This will be used to detect the fields inside a xml file. 
+#  Detectors are associated with the index of the property in the Wikibase instance, since it seems that there is no other way to access all the properties of the instance by label. 
+#  A possibility could require making the Wikidata Query Service accessible on our instance, but this is something we could investigate in the future. 
+#  For the moment, we leave it like that, even if this solution is not recommended since it assumes that the properties are stable in the instance. 
 #  TODO: Complete this mapping when all the detectors will be defined.
 detectors = {
-    "Title": detectors.TitleDetector(),
+    "P72": detectors.TitleDetector(),
 }
 
 #  TODO: of course, this will be removed in the last version since they will be passed. 
@@ -109,7 +112,14 @@ async def validate_xml(
             item_exists, item_id = client.retrieve_item_by_label(label, label_language="it")
             if item_exists:
                 return HTTPException(status_code=400, detail=f"Item with the given label already exists (item {item_id}). Use the patch endpoint if you want to add/change properties. ")
-    
+            #  The item with the given label is added to the WB instance. 
+            #  The add_item method also allows to add a description for the item (we must specify the language of the description).
+            #  TODO: if we want to add a description when creating an item, we should pass the description explicitly in the request. 
+            item_id = client.add_item(label, label_language="it")
+            #  add_item returns the id of the added item if addition takes place successfully, otherwise it returns None
+            if item_id is None:
+                raise HTTPException(status_code=500, detail="Item addition failed")
+            
             #  Identification of the fields present in the xml file.
             #  This is done by applying all the detectors. 
             for field in detectors.keys():
@@ -117,8 +127,14 @@ async def validate_xml(
                 detection_results = detectors[field].detect(content)
                 #  For every detected value, a statement is added to WB. 
                 for detection_result in detection_results:
+                    #  A value is just a string of text. 
                     pass
-
+                    #  Addition of the statement. It is True if addition happened successfully, None otherwise
+                    #  So far, we assume that qualifiers and references are not used. 
+                    outcome_statement_addition = client.add_statement(item_id, field, detection_result)
+                    if not outcome_statement_addition:
+                        raise HTTPException(status_code=500, detail="Statement addition failed")
+                    
             return ValidationResponse(
                 valid=True,
                 errors=[]
