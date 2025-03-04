@@ -93,3 +93,770 @@ class TitleDetector(Detector):
                         results.append(title.text.strip())
                         
         return list(set(results))
+
+
+class ShortTitleDetector(Detector):
+    """
+    This class is a detector for the field Short Title
+    """
+    def __init__(self):
+        self.field = 'short_title'
+        super().__init__()
+
+    def detect(self, xml_content):
+        """
+        Detects if the Short Title field can be found in the XML content.
+        Takes as input the byte representation of the XML content produced by the FileUpload.read() method of FastAPI.
+        Uses the schemas defined by Links.
+        Returns a list with the detected results.
+        """
+        # Parse the XML
+        root = self.parser(xml_content)
+        ns = self.get_namespace(root)
+        ns_map = {'ns': ns} if ns else {}
+
+        results = []
+
+        # Create namespace-aware path expressions
+        if ns:
+            # With namespace
+            titlestmt_path = ".//ns:titleStmt"
+            short_title_path = ".//ns:title[@type='short']"
+            sourcedesc_path = ".//ns:sourceDesc//ns:biblFull//ns:titleStmt"
+        else:
+            # No namespace
+            titlestmt_path = ".//titleStmt"
+            short_title_path = ".//title[@type='short']"
+            sourcedesc_path = ".//sourceDesc//biblFull//titleStmt"
+
+        # 1) Check for <title type="short"> under <titleStmt> (but not under <sourceDesc>)
+        for titlestmt in root.xpath(titlestmt_path, namespaces=ns_map):
+            parent = titlestmt.getparent()
+            # If the parent is <sourceDesc>, skip here (it will be handled in the next loop)
+            if parent is not None and parent.tag.endswith('sourceDesc'):
+                continue
+
+            short_title_elements = titlestmt.xpath(short_title_path, namespaces=ns_map)
+            for short_title in short_title_elements:
+                if short_title.text:
+                    results.append(short_title.text.strip())
+
+        # 2) Check for <title type="short"> under <sourceDesc><biblFull><titleStmt>
+        for sourcedesc_titlestmt in root.xpath(sourcedesc_path, namespaces=ns_map):
+            short_title_elements = sourcedesc_titlestmt.xpath(short_title_path, namespaces=ns_map)
+            for short_title in short_title_elements:
+                if short_title.text:
+                    results.append(short_title.text.strip())
+
+        # Return unique results
+        return list(set(results))
+
+
+class AlternativeTitleDetector(Detector):
+    """
+    This class is a detector for the field Alternative Title
+    """
+    def __init__(self):
+        self.field = 'alternative_title'
+        super().__init__()
+
+    def detect(self, xml_content):
+        """
+        Detects if the Alternative Title field can be found in the XML content.
+        Takes as input the byte representation of the XML content produced by the FileUpload.read() method of FastAPI.
+        Uses the schemas defined by Links.
+        Returns a list with the detected results.
+        """
+        # Parse the XML
+        root = self.parser(xml_content)
+        ns = self.get_namespace(root)
+        ns_map = {'ns': ns} if ns else {}
+
+        results = []
+
+        # Create namespace-aware path expressions
+        if ns:
+            # With namespace
+            titlestmt_path = ".//ns:titleStmt"
+            alt_title_path = ".//ns:title[@type='alternative']"
+            sourcedesc_path = ".//ns:sourceDesc//ns:biblFull//ns:titleStmt"
+        else:
+            # No namespace
+            titlestmt_path = ".//titleStmt"
+            alt_title_path = ".//title[@type='alternative']"
+            sourcedesc_path = ".//sourceDesc//biblFull//titleStmt"
+
+        # 1) Check for <title type="alternative"> under <titleStmt> (but not under <sourceDesc>)
+        for titlestmt in root.xpath(titlestmt_path, namespaces=ns_map):
+            parent = titlestmt.getparent()
+            # If the parent is <sourceDesc>, skip here (it will be handled in the next loop)
+            if parent is not None and parent.tag.endswith('sourceDesc'):
+                continue
+
+            alt_title_elements = titlestmt.xpath(alt_title_path, namespaces=ns_map)
+            for alt_title in alt_title_elements:
+                if alt_title.text:
+                    results.append(alt_title.text.strip())
+
+        # 2) Check for <title type="alternative"> under <sourceDesc><biblFull><titleStmt>
+        for sourcedesc_titlestmt in root.xpath(sourcedesc_path, namespaces=ns_map):
+            alt_title_elements = sourcedesc_titlestmt.xpath(alt_title_path, namespaces=ns_map)
+            for alt_title in alt_title_elements:
+                if alt_title.text:
+                    results.append(alt_title.text.strip())
+
+        # Return unique results
+        return list(set(results))
+
+
+class AuthorDetector(Detector):
+    """
+    This class is a detector for the field Author
+    """
+    def __init__(self):
+        self.field = 'author'
+        super().__init__()
+
+    def detect(self, xml_content):
+        """
+        Detects if the Author field can be found in the XML content.
+        Takes as input the byte representation of the XML content produced by the FileUpload.read() method of FastAPI.
+        Uses the schemas defined by Links. 
+        Returns a list with the detected results. 
+        """
+        root = self.parser(xml_content)  # Uses the general method to parse the file using lxml.
+        ns = self.get_namespace(root)
+        ns_map = {'ns': ns} if ns else {}
+
+        # Here will be saved all the results of the detection.
+        results = []
+ 
+        # Create namespace-aware path expressions
+        if ns:
+            # With namespace
+            titlestmt_path = ".//ns:titleStmt"
+            author_path = ".//ns:author"
+            persname_path = ".//ns:persName"
+            forename_path = ".//ns:forename"
+            surname_path = ".//ns:surname"
+            sourcedesc_path = ".//ns:sourceDesc//ns:biblFull//ns:titleStmt"
+        else:
+            # No namespace
+            titlestmt_path = ".//titleStmt"
+            author_path = ".//author"
+            persname_path = ".//persName"
+            forename_path = ".//forename"
+            surname_path = ".//surname"
+            sourcedesc_path = ".//sourceDesc//biblFull//titleStmt"
+
+        # Process author information from titleStmt
+        for titlestmt in root.xpath(titlestmt_path, namespaces=ns_map):
+            # Skip titleStmt under sourceDesc - will be handled separately
+            parent = titlestmt.getparent()
+            if parent is not None and parent.tag.endswith('sourceDesc'):
+                continue
+                
+            # Find all author elements under titleStmt
+            author_elements = titlestmt.xpath(author_path, namespaces=ns_map)
+            for author in author_elements:
+                author_info = self._extract_author_info(author, persname_path, forename_path, surname_path, ns_map)
+                if author_info:
+                    results.append(author_info)
+
+        # Process author information from sourceDesc/biblFull/titleStmt
+        for sourcedesc_titlestmt in root.xpath(sourcedesc_path, namespaces=ns_map):
+            author_elements = sourcedesc_titlestmt.xpath(author_path, namespaces=ns_map)
+            for author in author_elements:
+                author_info = self._extract_author_info(author, persname_path, forename_path, surname_path, ns_map)
+                if author_info:
+                    results.append(author_info)
+                        
+        return list(set(results))
+    
+    def _extract_author_info(self, author_element, persname_path, forename_path, surname_path, ns_map):
+        """
+        Helper method to extract author information from an author element.
+        Handles the extraction of forename and surname from persName.
+        """
+        # First look for persName element
+        persname_elements = author_element.xpath(persname_path, namespaces=ns_map)
+        
+        if persname_elements:
+            persname = persname_elements[0]
+            
+            # Extract forename and surname
+            forenames = persname.xpath(forename_path, namespaces=ns_map)
+            surnames = persname.xpath(surname_path, namespaces=ns_map)
+            
+            # Construct the author name
+            name_parts = []
+            
+            # Add forenames
+            for forename in forenames:
+                if forename.text:
+                    # Check if it's an initial (has full="init" attribute)
+                    if forename.get('full') == 'init':
+                        name_parts.append(f"{forename.text.strip()}.")
+                    else:
+                        name_parts.append(forename.text.strip())
+            
+            # Add surnames
+            for surname in surnames:
+                if surname.text:
+                    name_parts.append(surname.text.strip())
+            
+            # If we have any name parts, return the joined name
+            if name_parts:
+                return " ".join(name_parts)
+            
+            # If persName has direct text content but no forename/surname elements
+            if persname.text and persname.text.strip():
+                return persname.text.strip()
+                
+        # If no persName or no valid structure inside persName,
+        # check if author element has direct text
+        if author_element.text and author_element.text.strip():
+            return author_element.text.strip()
+            
+        return None
+
+
+class VIAFDetector(Detector):
+    """
+    This class is a detector for the VIAF field.
+    It looks for <persName> elements in four main locations:
+      1) Under <titleStmt><author>
+      2) Under <titleStmt><respStmt><resp>
+      3) Under <sourceDesc><biblFull><titleStmt><author>
+      4) Under <sourceDesc><biblFull><titleStmt><respStmt><resp>
+
+    Within each <persName>, it extracts:
+      - The value of the 'ref' attribute (if present)
+      - The text of <idno type="VIAF"> (if present)
+
+    It returns a list of unique strings in the form:
+      "<ref_attribute> - <viaf_text>"
+    or just one of the two if the other is missing.
+    """
+    def __init__(self):
+        self.field = 'viaf'
+        super().__init__()
+
+    def detect(self, xml_content):
+        """
+        Detects if the VIAF field can be found in the XML content.
+        Takes as input the byte representation of the XML content produced
+        by the FileUpload.read() method of FastAPI.
+        Uses the schemas defined by Links.
+        Returns a list with the detected results.
+        """
+        # Parse the XML and extract the namespace
+        root = self.parser(xml_content)
+        ns = self.get_namespace(root)
+        ns_map = {'ns': ns} if ns else {}
+
+        results = []
+
+        # Create namespace-aware path expressions
+        if ns:
+            # With namespace
+            titlestmt_path = ".//ns:titleStmt"
+            sourcedesc_path = ".//ns:sourceDesc//ns:biblFull//ns:titleStmt"
+            author_persname_path = ".//ns:author//ns:persName"
+            resp_persname_path = ".//ns:respStmt//ns:resp//ns:persName"
+            viaf_idno_path = ".//ns:idno[@type='VIAF']"
+        else:
+            # No namespace
+            titlestmt_path = ".//titleStmt"
+            sourcedesc_path = ".//sourceDesc//biblFull//titleStmt"
+            author_persname_path = ".//author//persName"
+            resp_persname_path = ".//respStmt//resp//persName"
+            viaf_idno_path = ".//idno[@type='VIAF']"
+
+        # Helper function to extract ref + VIAF from a <persName>
+        def extract_viaf_info(persname_element):
+            """
+            Extracts:
+              - the 'ref' attribute from <persName>
+              - all <idno type="VIAF"> texts
+            Returns a list of combined strings (one for each VIAF ID found).
+            """
+            ref_val = persname_element.get("ref")
+            viaf_id_elems = persname_element.xpath(viaf_idno_path, namespaces=ns_map)
+            viaf_ids = [elem.text.strip() for elem in viaf_id_elems if elem.text]
+
+            # If there's no VIAF and no ref, return an empty list
+            if not viaf_ids and not ref_val:
+                return []
+
+            # If we have multiple VIAF IDs, pair each with ref if present
+            results_local = []
+            if viaf_ids:
+                for viaf_id in viaf_ids:
+                    if ref_val:
+                        results_local.append(f"{ref_val} - {viaf_id}")
+                    else:
+                        results_local.append(viaf_id)
+            else:
+                # If no VIAF, just use the ref
+                results_local.append(ref_val)
+            return results_local
+
+        # 1) Check for <persName> under <titleStmt> that is NOT under <sourceDesc>
+        for titlestmt in root.xpath(titlestmt_path, namespaces=ns_map):
+            parent = titlestmt.getparent()
+            # Skip if the parent is <sourceDesc>, since that is handled separately
+            if parent is not None and parent.tag.endswith('sourceDesc'):
+                continue
+
+            # Gather all <persName> in <author> and <respStmt><resp>
+            persname_elems = titlestmt.xpath(author_persname_path, namespaces=ns_map)
+            persname_elems += titlestmt.xpath(resp_persname_path, namespaces=ns_map)
+
+            for persname in persname_elems:
+                results.extend(extract_viaf_info(persname))
+
+        # 2) Check for <persName> under <sourceDesc><biblFull><titleStmt>
+        for sourcedesc_titlestmt in root.xpath(sourcedesc_path, namespaces=ns_map):
+            # Gather all <persName> in <author> and <respStmt><resp>
+            persname_elems = sourcedesc_titlestmt.xpath(author_persname_path, namespaces=ns_map)
+            persname_elems += sourcedesc_titlestmt.xpath(resp_persname_path, namespaces=ns_map)
+
+            for persname in persname_elems:
+                results.extend(extract_viaf_info(persname))
+
+        return list(set(results))
+
+
+class ISNIDetector(Detector):
+    """
+    This class is a detector for the ISNI field.
+    It looks for <persName> elements in four main locations:
+      1) Under <titleStmt><author>
+      2) Under <titleStmt><respStmt><resp>
+      3) Under <sourceDesc><biblFull><titleStmt><author>
+      4) Under <sourceDesc><biblFull><titleStmt><respStmt><resp>
+
+    Within each <persName>, it extracts:
+      - The value of the 'ref' attribute (if present)
+      - The text of <idno type="ISNI"> (if present)
+
+    It returns a list of unique strings in the form:
+      "<ref_attribute> - <isni_text>"
+    or just one of the two if the other is missing.
+    """
+    def __init__(self):
+        self.field = 'isni'
+        super().__init__()
+
+    def detect(self, xml_content):
+        """
+        Detects if the ISNI field can be found in the XML content.
+        Takes as input the byte representation of the XML content produced
+        by the FileUpload.read() method of FastAPI.
+        Uses the schemas defined by Links.
+        Returns a list with the detected results.
+        """
+        # Parse the XML and extract the namespace
+        root = self.parser(xml_content)
+        ns = self.get_namespace(root)
+        ns_map = {'ns': ns} if ns else {}
+
+        results = []
+
+        # Create namespace-aware path expressions
+        if ns:
+            # With namespace
+            titlestmt_path = ".//ns:titleStmt"
+            sourcedesc_path = ".//ns:sourceDesc//ns:biblFull//ns:titleStmt"
+            author_persname_path = ".//ns:author//ns:persName"
+            resp_persname_path = ".//ns:respStmt//ns:resp//ns:persName"
+            isni_idno_path = ".//ns:idno[@type='ISNI']"
+        else:
+            # No namespace
+            titlestmt_path = ".//titleStmt"
+            sourcedesc_path = ".//sourceDesc//biblFull//titleStmt"
+            author_persname_path = ".//author//persName"
+            resp_persname_path = ".//respStmt//resp//persName"
+            isni_idno_path = ".//idno[@type='ISNI']"
+
+        # Helper function to extract ref + ISNI from a <persName>
+        def extract_isni_info(persname_element):
+            """
+            Extracts:
+              - the 'ref' attribute from <persName>
+              - all <idno type="ISNI"> texts
+            Returns a list of combined strings (one for each ISNI ID found).
+            """
+            ref_val = persname_element.get("ref")
+            isni_id_elems = persname_element.xpath(isni_idno_path, namespaces=ns_map)
+            isni_ids = [elem.text.strip() for elem in isni_id_elems if elem.text]
+
+            # If there's no ISNI and no ref, return an empty list
+            if not isni_ids and not ref_val:
+                return []
+
+            # If we have multiple ISNI IDs, pair each with ref if present
+            results_local = []
+            if isni_ids:
+                for isni_id in isni_ids:
+                    if ref_val:
+                        results_local.append(f"{ref_val} - {isni_id}")
+                    else:
+                        results_local.append(isni_id)
+            else:
+                # If no ISNI, just use the ref
+                results_local.append(ref_val)
+            return results_local
+
+        # 1) Check for <persName> under <titleStmt> that is NOT under <sourceDesc>
+        for titlestmt in root.xpath(titlestmt_path, namespaces=ns_map):
+            parent = titlestmt.getparent()
+            # Skip if the parent is <sourceDesc>, since that is handled separately
+            if parent is not None and parent.tag.endswith('sourceDesc'):
+                continue
+
+            # Gather all <persName> in <author> and <respStmt><resp>
+            persname_elems = titlestmt.xpath(author_persname_path, namespaces=ns_map)
+            persname_elems += titlestmt.xpath(resp_persname_path, namespaces=ns_map)
+
+            for persname in persname_elems:
+                results.extend(extract_isni_info(persname))
+
+        # 2) Check for <persName> under <sourceDesc><biblFull><titleStmt>
+        for sourcedesc_titlestmt in root.xpath(sourcedesc_path, namespaces=ns_map):
+            # Gather all <persName> in <author> and <respStmt><resp>
+            persname_elems = sourcedesc_titlestmt.xpath(author_persname_path, namespaces=ns_map)
+            persname_elems += sourcedesc_titlestmt.xpath(resp_persname_path, namespaces=ns_map)
+
+            for persname in persname_elems:
+                results.extend(extract_isni_info(persname))
+
+        return list(set(results))
+
+
+class RoleDetector(Detector):
+    """
+    This class is a detector for the 'role' field.
+    It looks for <resp> elements in two main locations:
+      1) Under <titleStmt><respStmt> (that is not itself under <sourceDesc>)
+      2) Under <sourceDesc><biblFull><titleStmt><respStmt>
+
+    It returns the text content of each <resp> found.
+    """
+    def __init__(self):
+        self.field = 'role'
+        super().__init__()
+
+    def detect(self, xml_content):
+        """
+        Detects if the 'role' field can be found in the XML content.
+        Takes as input the byte representation of the XML content produced
+        by the FileUpload.read() method of FastAPI.
+        Uses the schemas defined by Links.
+        Returns a list with the detected results (unique values).
+        """
+        # Parse the XML and extract the namespace
+        root = self.parser(xml_content)
+        ns = self.get_namespace(root)
+        ns_map = {'ns': ns} if ns else {}
+
+        results = []
+
+        # Create namespace-aware path expressions
+        if ns:
+            # With namespace
+            titlestmt_path = ".//ns:titleStmt"
+            sourcedesc_titlestmt_path = ".//ns:sourceDesc//ns:biblFull//ns:titleStmt"
+            resp_path = ".//ns:resp"
+        else:
+            # No namespace
+            titlestmt_path = ".//titleStmt"
+            sourcedesc_titlestmt_path = ".//sourceDesc//biblFull//titleStmt"
+            resp_path = ".//resp"
+
+        # 1) Check <resp> under <titleStmt><respStmt> (excluding those under <sourceDesc>)
+        for titlestmt in root.xpath(titlestmt_path, namespaces=ns_map):
+            parent = titlestmt.getparent()
+            # Skip if the parent is <sourceDesc>, since that is handled separately
+            if parent is not None and parent.tag.endswith('sourceDesc'):
+                continue
+
+            # Find all <resp> within <respStmt>
+            resp_elements = titlestmt.xpath(resp_path, namespaces=ns_map)
+            for resp_elem in resp_elements:
+                if resp_elem.text:
+                    results.append(resp_elem.text.strip())
+
+        # 2) Check <resp> under <sourceDesc><biblFull><titleStmt><respStmt>
+        for sourcedesc_titlestmt in root.xpath(sourcedesc_titlestmt_path, namespaces=ns_map):
+            # Find all <resp> within <respStmt>
+            resp_elements = sourcedesc_titlestmt.xpath(resp_path, namespaces=ns_map)
+            for resp_elem in resp_elements:
+                if resp_elem.text:
+                    results.append(resp_elem.text.strip())
+
+        # Return unique results
+        return list(set(results))
+
+
+class TypeDetector(Detector):
+    """
+    This class is a detector for the 'type' field.
+    It looks for <resp> elements in two main locations:
+      1) Under <titleStmt><respStmt> (that is not itself under <sourceDesc>)
+      2) Under <sourceDesc><biblFull><titleStmt><respStmt>
+    
+    Within each <resp>, it extracts the text from <persName> and <orgName>.
+    It returns a list of unique strings (each being the text of <persName> or <orgName>).
+    """
+    def __init__(self):
+        self.field = 'type'
+        super().__init__()
+
+    def detect(self, xml_content):
+        """
+        Detects if the 'type' field can be found in the XML content.
+        Takes as input the byte representation of the XML content produced
+        by the FileUpload.read() method of FastAPI.
+        Uses the schemas defined by Links.
+        Returns a list with the detected results (unique values).
+        """
+        # Parse the XML and extract the namespace
+        root = self.parser(xml_content)
+        ns = self.get_namespace(root)
+        ns_map = {'ns': ns} if ns else {}
+
+        results = []
+
+        # Create namespace-aware path expressions
+        if ns:
+            titlestmt_path = ".//ns:titleStmt"
+            sourcedesc_titlestmt_path = ".//ns:sourceDesc//ns:biblFull//ns:titleStmt"
+            resp_path = ".//ns:respStmt//ns:resp"
+            persName_path = ".//ns:persName"
+            orgName_path = ".//ns:orgName"
+        else:
+            titlestmt_path = ".//titleStmt"
+            sourcedesc_titlestmt_path = ".//sourceDesc//biblFull//titleStmt"
+            resp_path = ".//respStmt//resp"
+            persName_path = ".//persName"
+            orgName_path = ".//orgName"
+
+        # 1) Check for <resp> under <titleStmt><respStmt>, excluding those under <sourceDesc>
+        for titlestmt in root.xpath(titlestmt_path, namespaces=ns_map):
+            parent = titlestmt.getparent()
+            # Skip if the parent is <sourceDesc>, since that is handled separately
+            if parent is not None and parent.tag.endswith('sourceDesc'):
+                continue
+
+            # Find all <resp> elements
+            resp_elements = titlestmt.xpath(resp_path, namespaces=ns_map)
+            for resp_el in resp_elements:
+                # Extract <persName> text
+                persname_elems = resp_el.xpath(persName_path, namespaces=ns_map)
+                for persname in persname_elems:
+                    if persname.text:
+                        results.append(persname.text.strip())
+
+                # Extract <orgName> text
+                orgname_elems = resp_el.xpath(orgName_path, namespaces=ns_map)
+                for orgname in orgname_elems:
+                    if orgname.text:
+                        results.append(orgname.text.strip())
+
+        # 2) Check for <resp> under <sourceDesc><biblFull><titleStmt><respStmt>
+        for sdt in root.xpath(sourcedesc_titlestmt_path, namespaces=ns_map):
+            resp_elements = sdt.xpath(resp_path, namespaces=ns_map)
+            for resp_el in resp_elements:
+                # Extract <persName> text
+                persname_elems = resp_el.xpath(persName_path, namespaces=ns_map)
+                for persname in persname_elems:
+                    if persname.text:
+                        results.append(persname.text.strip())
+
+                # Extract <orgName> text
+                orgname_elems = resp_el.xpath(orgName_path, namespaces=ns_map)
+                for orgname in orgname_elems:
+                    if orgname.text:
+                        results.append(orgname.text.strip())
+
+        # Return unique results
+        return list(set(results))
+
+
+class NameDetector(Detector):
+    """
+    This class is a detector for the 'name' field.
+    It looks for <persName> elements in two main locations:
+      1) Under <titleStmt><respStmt><resp> (that is not itself under <sourceDesc>)
+      2) Under <sourceDesc><biblFull><titleStmt><respStmt><resp>
+
+    Within each <persName>, it extracts the text from:
+      - <forename> (including those with full="init" if present)
+      - <surname>
+
+    It then combines the forenames and surnames into a single string per <persName>.
+    It returns a list of unique name strings.
+    """
+    def __init__(self):
+        self.field = 'name'
+        super().__init__()
+
+    def detect(self, xml_content):
+        """
+        Detects if the 'name' field can be found in the XML content.
+        Takes as input the byte representation of the XML content produced
+        by the FileUpload.read() method of FastAPI.
+        Uses the schemas defined by Links.
+        Returns a list with the detected results (unique values).
+        """
+        # Parse the XML and extract the namespace
+        root = self.parser(xml_content)
+        ns = self.get_namespace(root)
+        ns_map = {'ns': ns} if ns else {}
+
+        results = []
+
+        # Create namespace-aware path expressions
+        if ns:
+            titlestmt_path = ".//ns:titleStmt"
+            sourcedesc_titlestmt_path = ".//ns:sourceDesc//ns:biblFull//ns:titleStmt"
+            persName_path = ".//ns:respStmt//ns:resp//ns:persName"
+            forename_path = ".//ns:forename"
+            surname_path = ".//ns:surname"
+        else:
+            titlestmt_path = ".//titleStmt"
+            sourcedesc_titlestmt_path = ".//sourceDesc//biblFull//titleStmt"
+            persName_path = ".//respStmt//resp//persName"
+            forename_path = ".//forename"
+            surname_path = ".//surname"
+
+        def extract_name(persname_element):
+            """
+            Collects all <forename> and <surname> text under a <persName> element,
+            combines them into one string, and returns it.
+            """
+            forenames = [
+                fn.text.strip()
+                for fn in persname_element.xpath(forename_path, namespaces=ns_map)
+                if fn.text
+            ]
+            surnames = [
+                sn.text.strip()
+                for sn in persname_element.xpath(surname_path, namespaces=ns_map)
+                if sn.text
+            ]
+
+            # Combine into a single string
+            if forenames or surnames:
+                return " ".join(forenames + surnames).strip()
+            return None
+
+        # 1) Check <persName> under <titleStmt><respStmt><resp> (excluding those under <sourceDesc>)
+        for titlestmt in root.xpath(titlestmt_path, namespaces=ns_map):
+            parent = titlestmt.getparent()
+            # Skip if the parent is <sourceDesc>, since that is handled separately
+            if parent is not None and parent.tag.endswith('sourceDesc'):
+                continue
+
+            # Find all <persName> in <respStmt><resp>
+            persname_elems = titlestmt.xpath(persName_path, namespaces=ns_map)
+            for persname_el in persname_elems:
+                name_value = extract_name(persname_el)
+                if name_value:
+                    results.append(name_value)
+
+        # 2) Check <persName> under <sourceDesc><biblFull><titleStmt><respStmt><resp>
+        for sdt in root.xpath(sourcedesc_titlestmt_path, namespaces=ns_map):
+            # Find all <persName> in <respStmt><resp>
+            persname_elems = sdt.xpath(persName_path, namespaces=ns_map)
+            for persname_el in persname_elems:
+                name_value = extract_name(persname_el)
+                if name_value:
+                    results.append(name_value)
+
+        # Return unique results
+        return list(set(results))
+
+
+class EditionDetector(Detector):
+    """
+    This class is a detector for the 'edition' field.
+    It looks for <editionStmt> elements in two main locations:
+      1) Under <fileDesc> (i.e., <editionStmt><edition>) that is not itself under <sourceDesc>
+      2) Under <sourceDesc><biblFull><editionStmt>
+
+    Within each <editionStmt>, it extracts the text from:
+      - <note type="digital-edition">
+      - <edition>
+
+    It returns a list of unique strings (each being the text content of these elements).
+    """
+    def __init__(self):
+        self.field = 'edition'
+        super().__init__()
+
+    def detect(self, xml_content):
+        """
+        Detects if the 'edition' field can be found in the XML content.
+        Takes as input the byte representation of the XML content produced
+        by the FileUpload.read() method of FastAPI.
+        Uses the schemas defined by Links.
+        Returns a list with the detected results (unique values).
+        """
+        # Parse the XML and extract the namespace
+        root = self.parser(xml_content)
+        ns = self.get_namespace(root)
+        ns_map = {'ns': ns} if ns else {}
+
+        results = []
+
+        # Create namespace-aware path expressions
+        if ns:
+            filedesc_editionstmt_path = ".//ns:editionStmt"
+            sourcedesc_editionstmt_path = ".//ns:sourceDesc//ns:biblFull//ns:editionStmt"
+            edition_path = ".//ns:edition"
+            digital_note_path = ".//ns:note[@type='digital-edition']"
+        else:
+            filedesc_editionstmt_path = ".//editionStmt"
+            sourcedesc_editionstmt_path = ".//sourceDesc//biblFull//editionStmt"
+            edition_path = ".//edition"
+            digital_note_path = ".//note[@type='digital-edition']"
+
+        # 1) Check <editionStmt> in <fileDesc>, excluding those under <sourceDesc>
+        #    (similar pattern to how we exclude <titleStmt> under <sourceDesc> in other detectors)
+        for editionstmt in root.xpath(filedesc_editionstmt_path, namespaces=ns_map):
+            parent = editionstmt.getparent()
+            # Skip if the parent is <sourceDesc>, since that is handled separately
+            if parent is not None and parent.tag.endswith('sourceDesc'):
+                continue
+
+            # Extract <note type="digital-edition">
+            note_elems = editionstmt.xpath(digital_note_path, namespaces=ns_map)
+            for note_el in note_elems:
+                if note_el.text:
+                    results.append(note_el.text.strip())
+
+            # Extract <edition>
+            edition_elems = editionstmt.xpath(edition_path, namespaces=ns_map)
+            for ed_el in edition_elems:
+                if ed_el.text:
+                    results.append(ed_el.text.strip())
+
+        # 2) Check <editionStmt> under <sourceDesc><biblFull>
+        for editionstmt in root.xpath(sourcedesc_editionstmt_path, namespaces=ns_map):
+            # Extract <note type="digital-edition">
+            note_elems = editionstmt.xpath(digital_note_path, namespaces=ns_map)
+            for note_el in note_elems:
+                if note_el.text:
+                    results.append(note_el.text.strip())
+
+            # Extract <edition>
+            edition_elems = editionstmt.xpath(edition_path, namespaces=ns_map)
+            for ed_el in edition_elems:
+                if ed_el.text:
+                    results.append(ed_el.text.strip())
+
+        # Return unique results
+        return list(set(results))

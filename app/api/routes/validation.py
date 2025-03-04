@@ -22,6 +22,10 @@ import app.schemas.error as errors
 #  TODO: Complete this mapping when all the detectors will be defined.
 detectors = {
     "P72": detectors.TitleDetector(),
+    "P73": detectors.ShortTitleDetector(),
+    "P74": detectors.AlternativeTitleDetector(),
+    #  "P75": detectors.AuthorDetector(),   #  TODO: we should clarify the author situation: Since the value in the xml-TEI should be the label of another item in the WB instance. 
+    "P76": detectors.VIAFDetector(),
 }
 
 #  TODO: of course, this will be removed in the last version since they will be passed. 
@@ -122,16 +126,37 @@ async def validate_xml(
             
             #  Identification of the fields present in the xml file.
             #  This is done by applying all the detectors. 
+            #  TODO: add transaction mechanisms so that if something goes wrong, the newly created item is canceled from the instance. 
+            #  Unfortunately, it seems like the WB instance does not provide an endpoint for item deletion, so we will need to check the action API. 
             for field in detectors.keys():
+                #  retrieves information about the property. In particular, we need the data_type since this will
+                #  impact how we add statements for that property. 
+                try:
+                    property_data_type = client.retrieve_property_info(field)["data_type"]
+                except:
+                    raise HTTPException(status_code=500, detail="Cannot retrieve the datatype of the property")
+                #  We decide on the value of the "type" field of statement addition based on the data type on the property.
+                #  This is crucial to ensure that statement addition is successful.
+                if property_data_type == "wikibase-item":
+                    statement_addition_type = "wikibase-entityid"  #  This ensures the value of the statement is a reference to a Wikibase item
+                else:
+                    statement_addition_type = "value"  #  This seems to hold for all properties with datatype different than "wikibase-item"
+
                 #  detection_results is a list with all the values detected for the field.
                 detection_results = detectors[field].detect(content)
                 #  For every detected value, a statement is added to WB. 
                 for detection_result in detection_results:
-                    #  A value is just a string of text. 
-                    pass
-                    #  Addition of the statement. It is True if addition happened successfully, None otherwise
-                    #  So far, we assume that qualifiers and references are not used. 
-                    outcome_statement_addition = client.add_statement(item_id, field, detection_result)
+                    #  If the value of the property is a reference to another Wikibase item, we should make sure the item exists in the WBinstance.
+                    #  Otherwise, we raise an error.
+                    if property_data_type == "wikibase-item":
+                        detection_result_item_exists, detection_result_item_id = client.retrieve_item_by_label(detection_result, "it")  #  we assume values are in Italian
+                        if not detection_result_item_exists:
+                            raise HTTPException(status_code=500, detail=f"An item with the value specified in the xml file for the property {field} does not exist in the WB instance.")
+                        else:
+                            outcome_statement_addition = client.add_statement(item_id, field, detection_result_item_id, statement_addition_type)
+                    else:
+                        outcome_statement_addition = client.add_statement(item_id, field, detection_result, statement_addition_type)
+                    #  The addition of the statement is True if the statement has been added successfully. 
                     if not outcome_statement_addition:
                         raise HTTPException(status_code=500, detail="Statement addition failed")
                     

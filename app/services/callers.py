@@ -70,8 +70,18 @@ class WikibaseAPIClient():
 
         return None
 
+
+    def retrieve_property_info(self, property_id):
+
+        response = requests.get(self.base_url + "/rest.php/wikibase/v1/entities/properties/" + property_id, auth=(self.username, self.password))
+
+        if response.status_code == 200:
+            return response.json()
+
+        return None
+
     
-    def add_statement(self, item_id, property_id, value):
+    def add_statement(self, item_id, property_id, value, statement_addition_type):
         #  Uses the payload for statements endpoint of the original Wikibase REST API.
         #  So far, it assumes no qualifiers or references are added.
         #  TODO: evaluate if references and qualifiers will be used and how, so to add them.
@@ -82,7 +92,7 @@ class WikibaseAPIClient():
                     "id": property_id
                 },
                 "value": {
-                    "type": "value",  #  it's not clear what this field means but it is the only one who seems to work.
+                    "type": statement_addition_type,  
                     "content": value
                 },
                 "qualifiers": [],
@@ -133,4 +143,5 @@ class WikibaseAPIClient():
 if __name__ == "__main__":
     client = WikibaseAPIClient("wikibase", "zf4mcfAS5cE3")
     print(client.check_connection())
-    #  client.add_property("Title", "en", "The title of the resource", "en")
+    #  client.add_property("Edition", "en", "The edition of the digital resource (e.g. first, second, third, ...)/The edition of the print resource (e.g. first, second, third, ...)", "en")
+    client.add_item("Title", "it", "The title of the digital resource (e.g. The War of the Roses, The Prayer for the Wounded)", "it")
