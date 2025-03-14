@@ -1412,3 +1412,490 @@ class OriginalEditionDetector(Detector):
 
         # Return unique results
         return list(set(results))
+
+
+class LicenceDetector(Detector):
+    """
+    This class is a detector for the Licence field.
+    """
+    def __init__(self):
+        self.field = 'licence'
+        super().__init__()
+
+    def detect(self, root, ns, ns_map):
+        """
+        Detects if the Licence field can be found in the XML content.
+        Takes as input the parsed XML root (e.g. from lxml) and the same ns, ns_map logic.
+        Returns a list with the detected results.
+        """
+        results = []
+
+        # Creazione dei percorsi XPath per namespace e non-namespace
+        if ns:
+            # Se ci sono namespace
+            licence_path = ".//ns:fileDesc//ns:sourceDesc//ns:biblFull//ns:publicationStmt//ns:availability//ns:licence"
+        else:
+            # Se non ci sono namespace
+            licence_path = ".//fileDesc//sourceDesc//biblFull//publicationStmt//availability//licence"
+
+        # Cerca gli elementi <licence> nel path specificato
+        licence_elements = root.xpath(licence_path, namespaces=ns_map)
+
+        # Estrae il testo (se presente) da ciascun elemento <licence>
+        for licence in licence_elements:
+            if licence.text:
+                results.append(licence.text.strip())
+
+        # Ritorna la lista dei risultati, rimuovendo eventuali duplicati
+        return list(set(results))
+    
+
+class VolumeDetector(Detector):
+    """
+    This class is a detector for the Volume field.
+    """
+    def __init__(self):
+        self.field = 'volume'
+        super().__init__()
+
+    def detect(self, root, ns, ns_map):
+        """
+        Detects if the Volume field can be found in the XML content.
+        Looks for <note type="volume"> under:
+            <fileDesc><sourceDesc><biblFull><notesStmt>
+        """
+        results = []
+
+        # Percorsi XPath con e senza namespace
+        if ns:
+            volume_path = ".//ns:fileDesc//ns:sourceDesc//ns:biblFull//ns:notesStmt//ns:note[@type='volume']"
+        else:
+            volume_path = ".//fileDesc//sourceDesc//biblFull//notesStmt//note[@type='volume']"
+
+        # Cerca gli elementi <note type="volume">
+        volume_elements = root.xpath(volume_path, namespaces=ns_map)
+
+        # Aggiunge il testo di ogni <note type="volume"> alla lista dei risultati
+        for volume in volume_elements:
+            if volume.text:
+                results.append(volume.text.strip())
+
+        # Rimuove duplicati e restituisce i risultati
+        return list(set(results))
+
+
+class TotalPagesDetector(Detector):
+    """
+    This class is a detector for the Total Pages field.
+    """
+    def __init__(self):
+        self.field = 'total_pages'
+        super().__init__()
+
+    def detect(self, root, ns, ns_map):
+        """
+        Detects if the Total Pages field can be found in the XML content.
+        Looks for <note type="pages"> under:
+            <fileDesc><sourceDesc><biblFull><notesStmt>
+        """
+        results = []
+
+        # Percorsi XPath con e senza namespace
+        if ns:
+            pages_path = ".//ns:fileDesc//ns:sourceDesc//ns:biblFull//ns:notesStmt//ns:note[@type='pages']"
+        else:
+            pages_path = ".//fileDesc//sourceDesc//biblFull//notesStmt//note[@type='pages']"
+
+        # Cerca gli elementi <note type="pages">
+        pages_elements = root.xpath(pages_path, namespaces=ns_map)
+
+        # Aggiunge il testo di ogni <note type="pages"> alla lista dei risultati
+        for page in pages_elements:
+            if page.text:
+                results.append(page.text.strip())
+
+        # Rimuove duplicati e restituisce i risultati
+        return list(set(results))
+
+
+class FormatDetector(Detector):
+    """
+    This class is a detector for the Format field.
+    """
+    def __init__(self):
+        self.field = 'format'
+        super().__init__()
+
+    def detect(self, root, ns, ns_map):
+        """
+        Detects if the Format field can be found in the XML content.
+        Looks for <note type="format"> under:
+            <fileDesc><sourceDesc><biblFull><notesStmt>
+        """
+        results = []
+
+        # Percorsi XPath con e senza namespace
+        if ns:
+            format_path = ".//ns:fileDesc//ns:sourceDesc//ns:biblFull//ns:notesStmt//ns:note[@type='format']"
+        else:
+            format_path = ".//fileDesc//sourceDesc//biblFull//notesStmt//note[@type='format']"
+
+        # Cerca gli elementi <note type="format">
+        format_elements = root.xpath(format_path, namespaces=ns_map)
+
+        # Aggiunge il testo di ogni <note type="format"> alla lista dei risultati
+        for fmt in format_elements:
+            if fmt.text:
+                results.append(fmt.text.strip())
+
+        # Rimuove duplicati e restituisce i risultati
+        return list(set(results))
+    
+
+class TotalDocumentsDetector(Detector):
+    """
+    Detector for M26 - Total documents.
+    Looks for <note type="documents"> under:
+        <fileDesc><sourceDesc><biblFull><notesStmt>
+    """
+    def __init__(self):
+        self.field = 'total_documents'
+        super().__init__()
+
+    def detect(self, root, ns, ns_map):
+        results = []
+
+        # Percorso XPath con/senza namespace
+        if ns:
+            xpath_expr = ".//ns:fileDesc//ns:sourceDesc//ns:biblFull//ns:notesStmt//ns:note[@type='documents']"
+        else:
+            xpath_expr = ".//fileDesc//sourceDesc//biblFull//notesStmt//note[@type='documents']"
+
+        elements = root.xpath(xpath_expr, namespaces=ns_map)
+
+        for el in elements:
+            if el.text:
+                results.append(el.text.strip())
+
+        return list(set(results))
+    
+
+class DigitalArchiveNameDetector(Detector):
+    """
+    Detector for M27 - Digital archive name.
+    Looks for <note type="repository"> under:
+        <fileDesc><noteStmt><note>
+    """
+    def __init__(self):
+        self.field = 'digital_archive_name'
+        super().__init__()
+
+    def detect(self, root, ns, ns_map):
+        results = []
+
+        # Percorso XPath con/senza namespace
+        if ns:
+            xpath_expr = ".//ns:fileDesc//ns:notesStmt//ns:note[@type='repository']"
+        else:
+            xpath_expr = ".//fileDesc//notesStmt//note[@type='repository']"
+
+        elements = root.xpath(xpath_expr, namespaces=ns_map)
+
+        for el in elements:
+            if el.text:
+                results.append(el.text.strip())
+
+        return list(set(results))
+    
+
+class PrintArchiveNameDetector(Detector):
+    """
+    Detector for M28 - Print archive name.
+    Looks for <note type="repository"> under:
+        <fileDesc><noteStmt><note>
+    (Stesso percorso di DigitalArchiveNameDetector, ma con significato diverso)
+    """
+    def __init__(self):
+        self.field = 'print_archive_name'
+        super().__init__()
+
+    def detect(self, root, ns, ns_map):
+        results = []
+
+        # Percorso XPath con/senza namespace
+        if ns:
+            xpath_expr = ".//ns:fileDesc//ns:notesStmt//ns:note[@type='repository']"
+        else:
+            xpath_expr = ".//fileDesc//notesStmt//note[@type='repository']"
+
+        elements = root.xpath(xpath_expr, namespaces=ns_map)
+
+        for el in elements:
+            if el.text:
+                results.append(el.text.strip())
+
+        return list(set(results))
+    
+
+class DigitalArchiveCodeDetector(Detector):
+    """
+    Detector for M29 - Digital archive code.
+    Looks for <note type="archival-code"> under:
+        <fileDesc><noteStmt><note>
+    """
+    def __init__(self):
+        self.field = 'digital_archive_code'
+        super().__init__()
+
+    def detect(self, root, ns, ns_map):
+        results = []
+
+        # Percorso XPath con/senza namespace
+        if ns:
+            xpath_expr = ".//ns:fileDesc//ns:notesStmt//ns:note[@type='archival-code']"
+        else:
+            xpath_expr = ".//fileDesc//notesStmt//note[@type='archival-code']"
+
+        elements = root.xpath(xpath_expr, namespaces=ns_map)
+
+        for el in elements:
+            if el.text:
+                results.append(el.text.strip())
+
+        return list(set(results))
+    
+
+class PrintArchiveCodeDetector(Detector):
+    """
+    Detector for M30 - Print archive code.
+    Looks for <note type="archival-code"> under:
+        <fileDesc><noteStmt><note>
+    """
+    def __init__(self):
+        self.field = 'print_archive_code'
+        super().__init__()
+
+    def detect(self, root, ns, ns_map):
+        results = []
+        
+        # Percorso XPath con/senza namespace
+        if ns:
+            xpath_expr = ".//ns:fileDesc//ns:notesStmt//ns:note[@type='archival-code']"
+        else:
+            xpath_expr = ".//fileDesc//notesStmt//note[@type='archival-code']"
+
+        elements = root.xpath(xpath_expr, namespaces=ns_map)
+        for el in elements:
+            if el.text:
+                results.append(el.text.strip())
+
+        return list(set(results))
+    
+
+class DigitalArchiveURLDetector(Detector):
+    """
+    Detector for M31 - Digital archive URL.
+    Looks for <ref target="url"> under:
+        <fileDesc><noteStmt><note>
+    """
+    def __init__(self):
+        self.field = 'digital_archive_url'
+        super().__init__()
+
+    def detect(self, root, ns, ns_map):
+        results = []
+
+        # Percorso XPath con/senza namespace
+        # Cerchiamo un tag <ref> con attributo target="url"
+        if ns:
+            xpath_expr = ".//ns:fileDesc//ns:notesStmt//ns:note//ns:ref[@target='url']"
+        else:
+            xpath_expr = ".//fileDesc//notesStmt//note//ref[@target='url']"
+
+        elements = root.xpath(xpath_expr, namespaces=ns_map)
+        for el in elements:
+            # Il contenuto potrebbe essere testo (es. l'URL stesso) o l'attributo "target".
+            # In genere, l'URL è spesso messo in un attributo 'href' o simile; 
+            # ma qui, ipotizziamo che <ref> contenga del testo.
+            if el.text:
+                results.append(el.text.strip())
+
+        return list(set(results))
+    
+
+class EncodingTextDetector(Detector):
+    """
+    Detector for M32 - Encoding text.
+    Looks for <p> under:
+        <encodingDesc><p><p>
+    (Significa che all'interno di <encodingDesc> possono esserci uno o più <p> 
+     con informazioni sulla codifica del testo.)
+    """
+    def __init__(self):
+        self.field = 'encoding_text'
+        super().__init__()
+
+    def detect(self, root, ns, ns_map):
+        results = []
+
+        # Percorso XPath con/senza namespace
+        # Qui assumiamo che i <p> siano direttamente (o nidificati) sotto <encodingDesc>.
+        # Se hai bisogno di esattamente due <p> annidati, potresti cambiare l'XPath.
+        if ns:
+            xpath_expr = ".//ns:encodingDesc//ns:p"
+        else:
+            xpath_expr = ".//encodingDesc//p"
+
+        elements = root.xpath(xpath_expr, namespaces=ns_map)
+        for el in elements:
+            if el.text:
+                results.append(el.text.strip())
+
+        return list(set(results))
+    
+
+class TextRecordingDetector(Detector):
+    """
+    Detector for M33 - Text recording.
+    Looks for <p> under:
+        <encodingDesc><samplingDecl>
+    """
+    def __init__(self):
+        self.field = 'text_recording'
+        super().__init__()
+
+    def detect(self, root, ns, ns_map):
+        results = []
+
+        # Percorso XPath con/senza namespace
+        if ns:
+            xpath_expr = ".//ns:encodingDesc//ns:samplingDecl//ns:p"
+        else:
+            xpath_expr = ".//encodingDesc//samplingDecl//p"
+
+        elements = root.xpath(xpath_expr, namespaces=ns_map)
+        for el in elements:
+            if el.text:
+                results.append(el.text.strip())
+
+        return list(set(results))
+    
+
+class LanguageDetector(Detector):
+    """
+    Detector for M34 - Language.
+    Looks for <language ident="ISO-code-lang1"> under:
+        <profileDesc><langUsage>
+    """
+    def __init__(self):
+        self.field = 'language'
+        super().__init__()
+
+    def detect(self, root, ns, ns_map):
+        results = []
+
+        # Percorso XPath con/senza namespace
+        if ns:
+            xpath_expr = ".//ns:profileDesc//ns:langUsage//ns:language[@ident='ISO-code-lang1']"
+        else:
+            xpath_expr = ".//profileDesc//langUsage//language[@ident='ISO-code-lang1']"
+
+        elements = root.xpath(xpath_expr, namespaces=ns_map)
+        for el in elements:
+            if el.text:
+                results.append(el.text.strip())
+
+        return list(set(results))
+    
+
+class AbstractDetector(Detector):
+    """
+    Detector for M35 - Abstract.
+    Looks for <p> under:
+        <profileDesc><abstract>
+    """
+    def __init__(self):
+        self.field = 'abstract'
+        super().__init__()
+
+    def detect(self, root, ns, ns_map):
+        results = []
+
+        # Percorso XPath con/senza namespace
+        if ns:
+            xpath_expr = ".//ns:profileDesc//ns:abstract//ns:p"
+        else:
+            xpath_expr = ".//profileDesc//abstract//p"
+
+        elements = root.xpath(xpath_expr, namespaces=ns_map)
+        for el in elements:
+            if el.text:
+                results.append(el.text.strip())
+
+        return list(set(results))
+    
+
+class KeywordDetector(Detector):
+    """
+    Detector for M36 - Keyword.
+    Looks for <term xml:lang="ISO-code-lang1"> under:
+        <profileDesc><textClass><keywords>
+    """
+    def __init__(self):
+        self.field = 'keyword'
+        super().__init__()
+
+    def detect(self, root, ns, ns_map):
+        results = []
+
+        # Percorso XPath con/senza namespace
+        if ns:
+            xpath_expr = ".//ns:profileDesc//ns:textClass//ns:keywords//ns:term[@xml:lang='ISO-code-lang1']"
+        else:
+            xpath_expr = ".//profileDesc//textClass//keywords//term[@xml:lang='ISO-code-lang1']"
+
+        elements = root.xpath(xpath_expr, namespaces=ns_map)
+        for el in elements:
+            if el.text:
+                results.append(el.text.strip())
+
+        return list(set(results))
+    
+
+class RevisionChangesDetector(Detector):
+    """
+    Detector for M37 - Revision changes.
+    Looks for <change who="..."> under:
+        <revisionDesc>
+    Then collects text from <date> and <desc> children if present.
+    """
+    def __init__(self):
+        self.field = 'revision_changes'
+        super().__init__()
+
+    def detect(self, root, ns, ns_map):
+        results = []
+
+        # Percorso XPath con/senza namespace
+        if ns:
+            xpath_expr = ".//ns:revisionDesc//ns:change"
+        else:
+            xpath_expr = ".//revisionDesc//change"
+
+        changes = root.xpath(xpath_expr, namespaces=ns_map)
+
+        for change_el in changes:
+            # Cerchiamo i sotto-elementi <date> e <desc>
+            date_el = change_el.find('./date', namespaces=ns_map)
+            desc_el = change_el.find('./desc', namespaces=ns_map)
+
+            date_text = date_el.text.strip() if (date_el is not None and date_el.text) else ""
+            desc_text = desc_el.text.strip() if (desc_el is not None and desc_el.text) else ""
+
+            # Se c'è almeno uno dei due, costruiamo un'unica stringa
+            if date_text or desc_text:
+                # Esempio di concatenazione "YYYY-MM-DD: Descrizione revisione"
+                combined = f"{date_text}: {desc_text}".strip(" :")
+                results.append(combined)
+
+        return list(set(results))

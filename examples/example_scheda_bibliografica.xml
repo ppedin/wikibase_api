@@ -162,11 +162,11 @@
             </textClass>
         </profileDesc>
         <revisionDesc> <!-- (Revision changes) Multivalue -->
-            <change who="name autor's revision">      <!-- Revision 1 -->
+            <change who="name author's revision">      <!-- Revision 1 -->
                 <date>The date of the revision</date>
                 <desc>A brief description of the object of the revision</desc>
             </change>
-            <change who="name autor's revision">      <!-- Revision 2 -->
+            <change who="name author's revision">      <!-- Revision 2 -->
                 <date>The date of the revision</date>
                 <desc>A brief description of the object of the revision</desc>
             </change>

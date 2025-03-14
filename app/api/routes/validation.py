@@ -27,7 +27,7 @@ import app.schemas.error as errors
 #  For the moment, we leave it like that, even if this solution is not recommended since it assumes that the properties are stable in the instance. 
 #  TODO: Complete this mapping when all the detectors will be defined.
 detector_mapping = {
-    "P72": detectors.TitleDetector(),
+    #  "P72": detectors.TitleDetector(),
     #  "P73": detectors.ShortTitleDetector(),
     #  "P74": detectors.AlternativeTitleDetector(),
     #  "P75": detectors.AuthorDetector(),   #  TODO: we should clarify the author situation: Since the value in the xml-TEI should be the label of another item in the WB instance. 
@@ -36,7 +36,7 @@ detector_mapping = {
     #  "P79": detectors.RoleDetector(),
     #  "P80": detectors.TypeDetector(),  #  TODO: doesn't work
     #  "P81": detectors.NameDetector(),  #  TODO: doesn't work
-    #  "P82": detectors.EditionDetector(),
+    #  "P82": detectors.EditionDetector(),  #  TODO: doesn't work
     #  "P83": detectors.DigitalFormatDetector(),
     #  "P84": detectors.EditorDetector(),
     #  "P85": detectors.IDResourceDetector(),
@@ -48,8 +48,22 @@ detector_mapping = {
     #  "P91": detectors.DataLinkedResourcesDetector(),
     #  "P92": detectors.EditorialDetector(),
     #  "P93": detectors.OriginalEditionDetector(),
-    
-    
+    #  "P94": detectors.LicenceDetector(),
+    #  "P95": detectors.VolumeDetector(),
+    #  "P96": detectors.TotalPagesDetector(),
+    #  "P97": detectors.FormatDetector(),
+    #  "P98": detectors.TotalDocumentsDetector(),
+    #  "P99": detectors.DigitalArchiveNameDetector(),
+    #  "P100": detectors.PrintArchiveNameDetector(), 
+    #  "P101": detectors.DigitalArchiveCodeDetector(), 
+    #  "P102": detectors.PrintArchiveCodeDetector(),  
+    #  "P103": detectors.DigitalArchiveURLDetector(), #TODO: test
+    #  "P104": detectors.EncodingTextDetector(), 
+    #  "P105": detectors.TextRecordingDetector(),  
+    #  "P106": detectors.LanguageDetector(),  
+    #  "P107": detectors.AbstractDetector(), 
+    #  "P108": detectors.KeywordDetector(),  
+    #  "P109": detectors.RevisionChangesDetector(),  #TODO: test
 }
 
 #  TODO: of course, this will be removed in the last version since they will be passed. 
@@ -181,7 +195,6 @@ async def validate_xml(
                 
                 detection_results = detector_mapping[field].detect(root, ns, ns_map)
 
-                #  detection_results = []
                 
                 #  For every detected value, a statement is added to WB. 
                 for detection_result in detection_results:
