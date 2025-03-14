@@ -1,5 +1,7 @@
 """
 This file contains functionalities to call the external Wikibase API. 
+!!! The execution of operation via the Wikibase REST API (used here) is subject to rate limits.
+Special rate limits should be applied to the users (to see later). !!!
 """
 
 import requests
@@ -100,7 +102,7 @@ class WikibaseAPIClient():
             },
             "tags": [],
             "bot": False,
-            "comment": ""
+            "comment": "",
         }
 
         response = requests.post(self.base_url + "/rest.php/wikibase/v1/entities/items/" + item_id + "/statements", auth=(self.username, self.password), json=payload)
@@ -112,8 +114,8 @@ class WikibaseAPIClient():
         return None
 
 
-    def add_property(self, label, label_language, description, description_language):
-        #  This method will not be used by the actual API, but its serve to tweak the properties of the instance in order to adapt the expected datatypes. 
+    def add_property(self, label, label_language, description, description_language, data_type="string"):
+        #  This method will not be used by the actual API, but it serves to tweak the properties of the instance in order to adapt the expected datatypes. 
         #  TODO: change the datatypes of the properties (so far, it has only been done for the Title property).
 
         payload = {
@@ -141,7 +143,41 @@ class WikibaseAPIClient():
 
 
 if __name__ == "__main__":
+    import time
     client = WikibaseAPIClient("wikibase", "zf4mcfAS5cE3")
     print(client.check_connection())
-    #  client.add_property("Edition", "en", "The edition of the digital resource (e.g. first, second, third, ...)/The edition of the print resource (e.g. first, second, third, ...)", "en")
-    client.add_item("Title", "it", "The title of the digital resource (e.g. The War of the Roses, The Prayer for the Wounded)", "it")
+    """
+    client.add_property("Licence", "en", "Information about a licence or other legal agreement applicable to the resource", "en", "string")
+    time.sleep(5)
+    client.add_property("Volume", "en", "The volume number or the tome number of the resource", "en", "string")
+    time.sleep(5)
+    client.add_property("Total pages", "en", "The total number of pages", "en", "string")
+    time.sleep(5)
+    client.add_property("Format", "en", "The format of the resource (refers to the physical sheet size of the resource, such as 8°, 12°) ", "en", "string")
+    time.sleep(5)
+    client.add_property("Total documents", "en", "The total number of documents contained in the resource", "en", "string")
+    time.sleep(5)
+    client.add_property("Digital archive name", "en", "Information about the repository where the digital material is stored", "en", "string")
+    time.sleep(5)
+    client.add_property("Print archive name", "en", "Information about the repository where the printed material is stored", "en", "string")
+    time.sleep(5)
+    client.add_property("Digital archive code", "en", "The archival code associated with the digital resource", "en", "external-id")
+    time.sleep(5)
+    client.add_property("Print archive code", "en", "The archival code associated with the print resource", "en", "external-id")
+    time.sleep(5)
+    client.add_property("Digital archive URL", "en", "A hyperlink to additional resources or information related to the repository or the materials in question", "en", "url")
+    time.sleep(5)
+    client.add_property("Encoding text", "en", "Information about the presence or the absence of the text encoding", "en", "string")
+    time.sleep(5)
+    client.add_property("Text recording", "en", "A prose description of the rationale and methods used in selecting texts, or parts of a text, for inclusion in the resource", "en", "string")
+    time.sleep(5)
+    client.add_property("Language", "en", "A single language or sublanguage used within the resource", "en", "string")
+    time.sleep(5)
+    client.add_property("Abstract", "en", "A summary or formal abstract added by the encoder", "en", "string")
+    time.sleep(5)
+    client.add_property("Keyword", "en", "A single-word, multi-word, or phrase identifying the topic or nature of the resource", "en", "string")
+    time.sleep(5)
+    client.add_property("Revision changes", "en", "The date of the revision/A brief description of the object of the revision", "en", "string")
+    """
+
+    #  client.add_item("Title", "it", "The title of the digital resource (e.g. The War of the Roses, The Prayer for the Wounded)", "it")

@@ -32,9 +32,9 @@ class SchemaValidator:
     
     #  The validate method is common to all the SchemaValidator objects.
     #  It iterates over the list of detectors for that SchemaValidator and ensures every of them has success (since each of them corresponds to a mandatory attribute). 
-    def validate(self, content: bytes) -> ValidationResult:
+    def validate(self, root, ns, ns_map) -> ValidationResult:
         for detector in self.detectors:
-            detection_results = detector.detect(content)
+            detection_results = detector.detect(root, ns, ns_map)
             if len(detection_results) == 0:
                 return ValidationResult(valid=False, errors=[ValidationError(None, "The field {} is mandatory and has not been detected in the xml provided.".format(detector.field))])
         return ValidationResult(valid=True)

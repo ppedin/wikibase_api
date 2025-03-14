@@ -4,9 +4,15 @@ Validation API Routes
 This module defines the API routes for validating XML content
 against the Scheda bibliografica schema.
 """
+
+import time
+
 from fastapi import APIRouter, File, Form, UploadFile, HTTPException, Depends
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
+from lxml import etree  #  This is used to parse the XML file parsed as input. 
+import re  #  This is used to extract the name space from an XML element tag, 
+
 
 from app.services.xml_validator import get_xml_validator, ValidationResult, ValidationError, XMLValidator
 from app.services.schema_registry import SchemaValidator, get_schema_validator
@@ -20,12 +26,30 @@ import app.schemas.error as errors
 #  A possibility could require making the Wikidata Query Service accessible on our instance, but this is something we could investigate in the future. 
 #  For the moment, we leave it like that, even if this solution is not recommended since it assumes that the properties are stable in the instance. 
 #  TODO: Complete this mapping when all the detectors will be defined.
-detectors = {
+detector_mapping = {
     "P72": detectors.TitleDetector(),
-    "P73": detectors.ShortTitleDetector(),
-    "P74": detectors.AlternativeTitleDetector(),
+    #  "P73": detectors.ShortTitleDetector(),
+    #  "P74": detectors.AlternativeTitleDetector(),
     #  "P75": detectors.AuthorDetector(),   #  TODO: we should clarify the author situation: Since the value in the xml-TEI should be the label of another item in the WB instance. 
-    "P76": detectors.VIAFDetector(),
+    #  "P76": detectors.VIAFDetector(),
+    #  "P77": detectors.ISNIDetector(),
+    #  "P79": detectors.RoleDetector(),
+    #  "P80": detectors.TypeDetector(),  #  TODO: doesn't work
+    #  "P81": detectors.NameDetector(),  #  TODO: doesn't work
+    #  "P82": detectors.EditionDetector(),
+    #  "P83": detectors.DigitalFormatDetector(),
+    #  "P84": detectors.EditorDetector(),
+    #  "P85": detectors.IDResourceDetector(),
+    #  "P86": detectors.DOIDetector(),
+    #  "P87": detectors.PublicationDateDetector(),
+    #  "P88": detectors.PublicationPlaceDetector(),
+    #  "P89": detectors.IssuingAuthorityDetector(),
+    #  "P90": detectors.AvailableInDetector(),
+    #  "P91": detectors.DataLinkedResourcesDetector(),
+    #  "P92": detectors.EditorialDetector(),
+    #  "P93": detectors.OriginalEditionDetector(),
+    
+    
 }
 
 #  TODO: of course, this will be removed in the last version since they will be passed. 
@@ -65,7 +89,6 @@ async def validate_xml(
     xml_validator: XMLValidator = Depends(get_xml_validator),
 ): 
     try:
-
         schema_validator = get_schema_validator(resource_type)
         # Reads the file using the UploadFile class method read()
         content = await file.read()
@@ -86,9 +109,17 @@ async def validate_xml(
                     for error in xml_validation_result.errors
                 ]
             )
+        
+        try:
+            root = etree.fromstring(content)  #  Parsing of the XML file is done here to avoid replicating the logic in each detector.
+            m = re.match(r'\{(.*)\}', root.tag)  #  Extraction of the namespace (this is done here to avoid logic replication in detectors.)
+            ns = m.group(1) if m else None
+            ns_map = {'ns': ns} if ns else {}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Cannot parse the input XML file. Error: {e}")
 
         #  If the file is valid xml, the SchemaValidator is applied to check it has all the mandatory fields. 
-        schema_validation_result = schema_validator.validate(content)
+        schema_validation_result = schema_validator.validate(root, ns, ns_map)
 
         if not schema_validation_result.valid:
             return ValidationResponse(
@@ -102,7 +133,6 @@ async def validate_xml(
                     for error in schema_validation_result.errors
                 ]
             )
-
         else:
             #  Creates a Wikibase client and checks if the connection can be established.
             client = callers.WikibaseAPIClient(username, password)
@@ -123,12 +153,19 @@ async def validate_xml(
             #  add_item returns the id of the added item if addition takes place successfully, otherwise it returns None
             if item_id is None:
                 raise HTTPException(status_code=500, detail="Item addition failed")
+            try:
+                root = etree.fromstring(content)  #  Parsing of the XML file is done here to avoid replicating the logic in each detector.
+                m = re.match(r'\{(.*)\}', root.tag)  #  Extraction of the namespace (this is done here to avoid logic replication in detectors.)
+                namespace = m.group(1) if m else None
+                ns_map = {'ns': namespace} if namespace else {}
+            except:
+                raise HTTPException(status_code=500, detail="Cannot parse the input XML file")
             
             #  Identification of the fields present in the xml file.
             #  This is done by applying all the detectors. 
             #  TODO: add transaction mechanisms so that if something goes wrong, the newly created item is canceled from the instance. 
             #  Unfortunately, it seems like the WB instance does not provide an endpoint for item deletion, so we will need to check the action API. 
-            for field in detectors.keys():
+            for field in detector_mapping.keys():
                 #  retrieves information about the property. In particular, we need the data_type since this will
                 #  impact how we add statements for that property. 
                 try:
@@ -140,10 +177,12 @@ async def validate_xml(
                 if property_data_type == "wikibase-item":
                     statement_addition_type = "wikibase-entityid"  #  This ensures the value of the statement is a reference to a Wikibase item
                 else:
-                    statement_addition_type = "value"  #  This seems to hold for all properties with datatype different than "wikibase-item"
+                    statement_addition_type = "value"  #  This seems to hold for all properties with datatype different than "wikibase-item"    
+                
+                detection_results = detector_mapping[field].detect(root, ns, ns_map)
 
-                #  detection_results is a list with all the values detected for the field.
-                detection_results = detectors[field].detect(content)
+                #  detection_results = []
+                
                 #  For every detected value, a statement is added to WB. 
                 for detection_result in detection_results:
                     #  If the value of the property is a reference to another Wikibase item, we should make sure the item exists in the WBinstance.
